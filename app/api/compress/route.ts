@@ -121,8 +121,10 @@ export async function POST(request: NextRequest) {
 
     if (blobUrl) {
       // Download from Vercel Blob
+      console.log('📥 Downloading from Blob URL:', blobUrl);
       const response = await fetch(blobUrl);
       if (!response.ok) {
+        console.error('❌ Blob fetch failed:', response.status, response.statusText);
         return NextResponse.json(
           { error: 'Failed to download image', details: 'Could not fetch the uploaded image.' },
           { status: 500 }
@@ -131,10 +133,23 @@ export async function POST(request: NextRequest) {
       const arrayBuffer = await response.arrayBuffer();
       buffer = Buffer.from(arrayBuffer);
       originalSize = buffer.length;
+      
+      console.log('✅ Downloaded from Blob:', {
+        bufferSize: buffer.length,
+        isEmpty: buffer.length === 0,
+      });
+
+      if (buffer.length === 0) {
+        return NextResponse.json(
+          { error: 'Empty image', details: 'The uploaded image is empty or corrupted.' },
+          { status: 400 }
+        );
+      }
 
       // Clean up the temporary blob file
       try {
         await del(blobUrl);
+        console.log('🗑️ Deleted temp blob');
       } catch (error) {
         console.error('Failed to delete blob:', error);
         // Non-critical error, continue processing

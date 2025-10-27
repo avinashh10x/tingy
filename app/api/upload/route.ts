@@ -1,36 +1,39 @@
-import { put } from '@vercel/blob';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
-export const maxDuration = 60; // 60 seconds for large uploads
+export const maxDuration = 60;
 
-export async function POST(request: NextRequest) {
+/**
+ * Client-side upload handler for Vercel Blob
+ * This generates a client upload URL, allowing direct browser → Blob uploads
+ * Bypasses the 4.5MB serverless payload limit
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const body = (await request.json()) as HandleUploadBody;
+
   try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
-    }
-
-    // Upload to Vercel Blob with a temporary prefix
-    const blob = await put(`temp/${file.name}`, file, {
-      access: 'public',
-      addRandomSuffix: true,
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        // Allow all image uploads to temp/ folder with unique filenames
+        return {
+          allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
+          addRandomSuffix: true, // Add random suffix to prevent filename conflicts
+        };
+      },
+      onUploadCompleted: async ({ blob }) => {
+        console.log('Blob uploaded:', blob.url);
+      },
     });
 
-    return NextResponse.json({
-      url: blob.url,
-      pathname: blob.pathname,
-    });
+    return NextResponse.json(jsonResponse);
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
-      { error: 'Upload failed' },
-      { status: 500 }
+      { error: (error as Error).message },
+      { status: 400 }
     );
   }
 }

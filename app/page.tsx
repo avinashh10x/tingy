@@ -13,6 +13,7 @@ export default function Home() {
     compressionOptions,
     compressionResult,
     isProcessing,
+    loaderIndex,
     setCompressionOptions,
     handleImageSelect,
     handleCompress,
@@ -90,7 +91,7 @@ export default function Home() {
 
         {/* Right Column - Preview & Results */}
         <div className="space-y-6">
-          <ImagePreview result={compressionResult} isProcessing={isProcessing} />
+          <ImagePreview result={compressionResult} isProcessing={isProcessing} loaderIndex={loaderIndex} />
         </div>
       </div>
 

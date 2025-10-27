@@ -4,13 +4,37 @@ import { Moon, Sun } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          size="icon"
+          variant="outline"
+          className="h-12 w-12 rounded-full border-2 shadow-lg backdrop-blur-sm"
+          aria-label="Toggle theme"
+          disabled
+        >
+          <Sun className="h-5 w-5" />
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <motion.div

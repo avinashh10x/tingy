@@ -1,22 +1,23 @@
 'use client';
 
-import { ArrowDownCircle, CheckCircle2, ImageIcon } from 'lucide-react';
+import { CheckCircle2, ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { calculateSavings, createDownloadFilename } from '@/lib/image-utils';
 import type { CompressionResult } from '@/types/image';
-import { motion } from 'framer-motion';
 import { CompressionStats } from '@/components/preview/CompressionStats';
 import { CompressionProgress } from '@/components/preview/CompressionProgress';
 import { ImageComparisonSlider } from '@/components/preview/ImageComparisonSlider';
 import { ImageDetails } from '@/components/preview/ImageDetails';
 import { DownloadSection } from '@/components/preview/DownloadSection';
+import { AnimatedLoader } from '@/components/preview/AnimatedLoader';
 
 interface ImagePreviewProps {
   result: CompressionResult | null;
   isProcessing?: boolean;
+  loaderIndex?: number;
 }
 
-export function ImagePreview({ result, isProcessing = false }: ImagePreviewProps) {
+export function ImagePreview({ result, isProcessing = false, loaderIndex = 0 }: ImagePreviewProps) {
   if (!result && !isProcessing) {
     return (
       <Card className="w-full">
@@ -34,18 +35,9 @@ export function ImagePreview({ result, isProcessing = false }: ImagePreviewProps
     return (
       <Card className="w-full">
         <CardContent className="flex min-h-[400px] items-center justify-center p-12">
-          <div className="text-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              className="mx-auto mb-4"
-            >
-              <ArrowDownCircle className="h-12 w-12 text-primary" />
-            </motion.div>
-            <p className="text-lg font-medium">Compressing your image...</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This usually takes just a few seconds
-            </p>
+          <div className="text-center space-y-4">
+            <AnimatedLoader loaderIndex={loaderIndex} />
+            {/* <p className="text-sm text-muted-foreground">Processing...</p> */}
           </div>
         </CardContent>
       </Card>
@@ -58,12 +50,7 @@ export function ImagePreview({ result, isProcessing = false }: ImagePreviewProps
   const downloadFilename = createDownloadFilename(result.original.name, result.processed.format);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="sticky top-8"
-    >
+    <div className="sticky top-8">
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -107,6 +94,6 @@ export function ImagePreview({ result, isProcessing = false }: ImagePreviewProps
           />
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

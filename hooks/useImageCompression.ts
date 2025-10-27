@@ -18,6 +18,7 @@ export function useImageCompression() {
   const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [loaderIndex, setLoaderIndex] = useState(0);
 
   // Cleanup blob URLs when specific images change (but not on every render)
   useEffect(() => {
@@ -67,6 +68,7 @@ export function useImageCompression() {
 
     setIsProcessing(true);
     setUploadProgress(0);
+    setLoaderIndex((prev) => prev + 1); // Increment to get next loader
     const startTime = Date.now();
 
     // Show upload progress for large files
@@ -160,6 +162,7 @@ export function useImageCompression() {
     compressionResult,
     isProcessing,
     uploadProgress,
+    loaderIndex,
     
     // Setters
     setCompressionOptions,

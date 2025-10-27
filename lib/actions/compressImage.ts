@@ -1,4 +1,5 @@
 import type { ImageFile, CompressionOptions, CompressionResult } from '@/types/image';
+import { upload } from '@vercel/blob/client';
 
 interface CompressImageResponse {
   blob: Blob;
@@ -9,40 +10,44 @@ interface CompressImageResponse {
 const DIRECT_UPLOAD_THRESHOLD = 4 * 1024 * 1024;
 
 /**
- * Upload large file to Vercel Blob storage
+ * Upload large file to Vercel Blob storage (client-side direct upload)
+ * This bypasses the serverless function payload limit
  * @param file - The file to upload
  * @param onProgress - Optional progress callback
  * @returns Promise with blob URL
  */
 async function uploadToBlob(file: File, onProgress?: (progress: number) => void): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const xhr = new XMLHttpRequest();
-
-  return new Promise((resolve, reject) => {
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable && onProgress) {
-        const progress = Math.round((e.loaded / e.total) * 100);
-        onProgress(progress);
-      }
+  try {
+    console.log('📤 Starting Blob upload:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
     });
 
-    xhr.addEventListener('load', () => {
-      if (xhr.status === 200) {
-        const data = JSON.parse(xhr.responseText);
-        resolve(data.url);
-      } else {
-        reject(new Error('Upload failed'));
-      }
+    // Use Vercel Blob's client-side upload - bypasses API route payload limit
+    const blob = await upload(`temp/${file.name}`, file, {
+      access: 'public',
+      handleUploadUrl: '/api/upload',
+      clientPayload: JSON.stringify({ filename: file.name }),
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          console.log(`📊 Upload progress: ${progress}%`);
+          onProgress(progress);
+        }
+      },
     });
 
-    xhr.addEventListener('error', () => reject(new Error('Upload failed')));
-    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+    console.log('✅ Blob upload complete:', {
+      url: blob.url,
+      pathname: blob.pathname,
+    });
 
-    xhr.open('POST', '/api/upload');
-    xhr.send(formData);
-  });
+    return blob.url;
+  } catch (error) {
+    console.error('❌ Blob upload failed:', error);
+    throw new Error('Failed to upload image to cloud storage');
+  }
 }
 
 /**
