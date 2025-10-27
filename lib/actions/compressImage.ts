@@ -5,48 +5,134 @@ interface CompressImageResponse {
   headers: Headers;
 }
 
+// File size threshold: 4MB (below Vercel's 4.5MB payload limit)
+const DIRECT_UPLOAD_THRESHOLD = 4 * 1024 * 1024;
+
 /**
- * Compress an image using the API
+ * Upload large file to Vercel Blob storage
+ * @param file - The file to upload
+ * @param onProgress - Optional progress callback
+ * @returns Promise with blob URL
+ */
+async function uploadToBlob(file: File, onProgress?: (progress: number) => void): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const xhr = new XMLHttpRequest();
+
+  return new Promise((resolve, reject) => {
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && onProgress) {
+        const progress = Math.round((e.loaded / e.total) * 100);
+        onProgress(progress);
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        resolve(data.url);
+      } else {
+        reject(new Error('Upload failed'));
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+    xhr.open('POST', '/api/upload');
+    xhr.send(formData);
+  });
+}
+
+/**
+ * Compress an image using the API (smart hybrid approach)
  * @param image - The image file to compress
  * @param options - Compression options (quality, format, dimensions)
+ * @param onUploadProgress - Optional progress callback for large file uploads
  * @returns Promise with compressed image blob and metadata
  */
 export async function compressImage(
   image: ImageFile,
-  options: CompressionOptions
+  options: CompressionOptions,
+  onUploadProgress?: (progress: number) => void
 ): Promise<CompressImageResponse> {
-  // Prepare form data
-  const formData = new FormData();
-  formData.append('file', image.file);
-  formData.append('format', options.format);
-  formData.append('quality', options.quality.toString());
-  formData.append('maintainAspectRatio', options.maintainAspectRatio.toString());
+  const fileSize = image.file.size;
+  const isLargeFile = fileSize >= DIRECT_UPLOAD_THRESHOLD;
 
-  if (options.width) {
-    formData.append('width', options.width.toString());
-  }
-  if (options.height) {
-    formData.append('height', options.height.toString());
-  }
-
-  // Call API
-  const response = await fetch('/api/compress', {
-    method: 'POST',
-    body: formData,
+  console.log('🔍 Compression routing:', {
+    fileSize,
+    fileSizeMB: (fileSize / 1024 / 1024).toFixed(2) + ' MB',
+    threshold: DIRECT_UPLOAD_THRESHOLD,
+    thresholdMB: (DIRECT_UPLOAD_THRESHOLD / 1024 / 1024).toFixed(2) + ' MB',
+    isLargeFile,
+    willUseBlob: isLargeFile,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.details || errorData.error || 'Compression failed');
+  if (isLargeFile) {
+    console.log('📤 Using BLOB upload path (large file)');
+    // Large files: Upload to Vercel Blob first, then compress
+    const blobUrl = await uploadToBlob(image.file, onUploadProgress);
+    console.log('✅ Uploaded to Blob:', blobUrl);
+
+    // Send blob URL to compression API
+    const response = await fetch('/api/compress', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        blobUrl,
+        format: options.format,
+        quality: options.quality,
+        width: options.width,
+        height: options.height,
+        maintainAspectRatio: options.maintainAspectRatio,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.details || errorData.error || 'Compression failed');
+    }
+
+    const blob = await response.blob();
+    return { blob, headers: response.headers };
+  } else {
+    console.log('⚡ Using DIRECT upload path (small file)');
+    // Small files: Direct upload (faster)
+    const formData = new FormData();
+    formData.append('file', image.file);
+    formData.append('format', options.format);
+    formData.append('quality', options.quality.toString());
+    formData.append('maintainAspectRatio', options.maintainAspectRatio.toString());
+
+    if (options.width) {
+      formData.append('width', options.width.toString());
+    }
+    if (options.height) {
+      formData.append('height', options.height.toString());
+    }
+
+    // Call API
+    const response = await fetch('/api/compress', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.details || errorData.error || 'Compression failed');
+    }
+
+    // Get compressed image blob
+    const blob = await response.blob();
+
+    return {
+      blob,
+      headers: response.headers,
+    };
   }
-
-  // Get compressed image blob
-  const blob = await response.blob();
-
-  return {
-    blob,
-    headers: response.headers,
-  };
 }
 
 /**

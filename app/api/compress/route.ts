@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
+import { del } from '@vercel/blob';
 import type { ImageFormat } from '@/types/image';
 
 // Maximum file size: 20MB
@@ -14,42 +15,70 @@ const ALLOWED_FORMATS: ImageFormat[] = ['jpeg', 'jpg', 'png', 'webp', 'avif'];
  */
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  let blobUrl: string | null = null;
 
   try {
-    // Parse form data
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const format = (formData.get('format') as ImageFormat) || 'jpeg';
-    const quality = parseInt(formData.get('quality') as string) || 80;
-    const width = formData.get('width') ? parseInt(formData.get('width') as string) : undefined;
-    const height = formData.get('height') ? parseInt(formData.get('height') as string) : undefined;
-    const maintainAspectRatio = formData.get('maintainAspectRatio') === 'true';
+    // Parse request body - support both direct upload and blob URL
+    const contentType = request.headers.get('content-type');
+    let file: File | null = null;
+    let format: ImageFormat = 'jpeg';
+    let quality = 80;
+    let width: number | undefined;
+    let height: number | undefined;
+    let maintainAspectRatio = true;
 
-    // Validation: File exists
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided', details: 'Please upload an image file.' },
-        { status: 400 }
-      );
-    }
+    if (contentType?.includes('application/json')) {
+      // Blob URL mode (large files)
+      const body = await request.json();
+      blobUrl = body.blobUrl;
+      format = (body.format as ImageFormat) || 'jpeg';
+      quality = parseInt(body.quality) || 80;
+      width = body.width ? parseInt(body.width) : undefined;
+      height = body.height ? parseInt(body.height) : undefined;
+      maintainAspectRatio = body.maintainAspectRatio !== false;
 
-    // Validation: File size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        {
-          error: 'File too large',
-          details: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
-        },
-        { status: 400 }
-      );
-    }
+      if (!blobUrl) {
+        return NextResponse.json(
+          { error: 'No blob URL provided', details: 'Please provide a blob URL.' },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Direct upload mode (small files <4MB)
+      const formData = await request.formData();
+      file = formData.get('file') as File;
+      format = (formData.get('format') as ImageFormat) || 'jpeg';
+      quality = parseInt(formData.get('quality') as string) || 80;
+      width = formData.get('width') ? parseInt(formData.get('width') as string) : undefined;
+      height = formData.get('height') ? parseInt(formData.get('height') as string) : undefined;
+      maintainAspectRatio = formData.get('maintainAspectRatio') === 'true';
 
-    // Validation: File type
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'Invalid file type', details: 'Only image files are allowed.' },
-        { status: 400 }
-      );
+      // Validation: File exists
+      if (!file) {
+        return NextResponse.json(
+          { error: 'No file provided', details: 'Please upload an image file.' },
+          { status: 400 }
+        );
+      }
+
+      // Validation: File size
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          {
+            error: 'File too large',
+            details: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Validation: File type
+      if (!file.type.startsWith('image/')) {
+        return NextResponse.json(
+          { error: 'Invalid file type', details: 'Only image files are allowed.' },
+          { status: 400 }
+        );
+      }
     }
 
     // Validation: Output format
@@ -86,9 +115,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Get image buffer - either from direct upload or blob URL
+    let buffer: Buffer;
+    let originalSize: number;
+
+    if (blobUrl) {
+      // Download from Vercel Blob
+      const response = await fetch(blobUrl);
+      if (!response.ok) {
+        return NextResponse.json(
+          { error: 'Failed to download image', details: 'Could not fetch the uploaded image.' },
+          { status: 500 }
+        );
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      originalSize = buffer.length;
+
+      // Clean up the temporary blob file
+      try {
+        await del(blobUrl);
+      } catch (error) {
+        console.error('Failed to delete blob:', error);
+        // Non-critical error, continue processing
+      }
+    } else if (file) {
+      // Convert file to buffer (direct upload)
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+      originalSize = file.size;
+    } else {
+      return NextResponse.json(
+        { error: 'No image provided', details: 'Please provide an image file or blob URL.' },
+        { status: 400 }
+      );
+    }
 
     // Initialize Sharp instance
     let sharpInstance = sharp(buffer, {
@@ -140,7 +201,7 @@ export async function POST(request: NextRequest) {
     headers.set('Content-Type', `image/${outputFormat}`);
     headers.set('Content-Length', outputBuffer.info.size.toString());
     headers.set('X-Processing-Time', processingTime.toString());
-    headers.set('X-Original-Size', file.size.toString());
+    headers.set('X-Original-Size', originalSize.toString());
     headers.set('X-Compressed-Size', outputBuffer.info.size.toString());
     headers.set('X-Original-Width', (metadata.width || 0).toString());
     headers.set('X-Original-Height', (metadata.height || 0).toString());

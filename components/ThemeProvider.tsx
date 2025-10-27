@@ -29,15 +29,16 @@ export function ThemeProvider({
   storageKey = 'tingy-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
-
-  useEffect(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     // Read from localStorage only on client side
-    const stored = localStorage.getItem(storageKey) as Theme;
-    if (stored && (stored === 'dark' || stored === 'light')) {
-      setTheme(stored);
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(storageKey) as Theme;
+      if (stored && (stored === 'dark' || stored === 'light')) {
+        return stored;
+      }
     }
-  }, [storageKey]);
+    return defaultTheme;
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;

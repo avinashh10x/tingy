@@ -141,7 +141,10 @@ export function ImageComparisonSlider({
             alt="Original"
             className="h-full w-full object-contain"
             draggable={false}
-            onError={() => setImageError(prev => ({ ...prev, original: true }))}
+            onError={(e) => {
+              console.error('Original image failed to load:', originalUrl, e);
+              setImageError(prev => ({ ...prev, original: true }));
+            }}
           />
           <div className="absolute bottom-2 left-2 rounded bg-background/90 px-2 py-1 text-xs font-medium backdrop-blur">
             Original

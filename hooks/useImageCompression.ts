@@ -17,18 +17,27 @@ export function useImageCompression() {
   });
   const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Cleanup blob URLs when component unmounts to prevent memory leaks
+  // Cleanup blob URLs when specific images change (but not on every render)
+  useEffect(() => {
+    // Cleanup OLD compression result when a NEW one is created
+    // But keep the original image preview URL intact
+    return () => {
+      if (compressionResult?.processed.url) {
+        URL.revokeObjectURL(compressionResult.processed.url);
+      }
+    };
+  }, [compressionResult?.processed.url]); // Only when processed URL changes
+
+  // Cleanup original image preview only when image changes or unmounts
   useEffect(() => {
     return () => {
       if (selectedImage?.preview) {
         URL.revokeObjectURL(selectedImage.preview);
       }
-      if (compressionResult?.processed.url) {
-        URL.revokeObjectURL(compressionResult.processed.url);
-      }
     };
-  }, [selectedImage, compressionResult]);
+  }, [selectedImage?.preview]); // Only when preview URL changes
 
   /**
    * Handle image selection from uploader
@@ -53,17 +62,39 @@ export function useImageCompression() {
       return;
     }
 
-    // Clean up previous compression result to prevent memory leak
-    if (compressionResult?.processed.url) {
-      URL.revokeObjectURL(compressionResult.processed.url);
-    }
+    // Don't clean up previous result here - let useEffect handle it
+    // This prevents revoking URLs while they're still being displayed
 
     setIsProcessing(true);
+    setUploadProgress(0);
     const startTime = Date.now();
 
+    // Show upload progress for large files
+    const fileSize = selectedImage.file.size;
+    const isLargeFile = fileSize >= 4 * 1024 * 1024; // 4MB threshold
+
+    if (isLargeFile) {
+      toast.info('Uploading large file...', {
+        description: `${(fileSize / 1024 / 1024).toFixed(1)} MB - This may take a moment`,
+        duration: 5000,
+      });
+    }
+
     try {
-      // Call compression API
-      const { blob, headers } = await compressImage(selectedImage, compressionOptions);
+      // Call compression API with progress callback
+      const { blob, headers } = await compressImage(
+        selectedImage,
+        compressionOptions,
+        (progress) => {
+          setUploadProgress(progress);
+          if (progress === 100 && isLargeFile) {
+            toast.info('Processing image...', {
+              description: 'Sharp is optimizing your image',
+              duration: 3000,
+            });
+          }
+        }
+      );
 
       // Calculate total processing time (including network)
       const totalTime = Date.now() - startTime;
@@ -93,6 +124,7 @@ export function useImageCompression() {
       });
     } finally {
       setIsProcessing(false);
+      setUploadProgress(0);
     }
   };
 
@@ -127,6 +159,7 @@ export function useImageCompression() {
     compressionOptions,
     compressionResult,
     isProcessing,
+    uploadProgress,
     
     // Setters
     setCompressionOptions,
