@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://tingy.vercel.app'), // Update with your actual domain
   title: {
@@ -83,8 +84,7 @@ export const metadata: Metadata = {
   },
   category: "technology",
   verification: {
-    // Add your verification codes after deployment
-    // google: 'your-google-verification-code',
+    google: '11fc782f0c5ff31a', // ← Extract code from filename: google[THIS_PART].html
     // yandex: 'your-yandex-verification-code',
     // bing: 'your-bing-verification-code',
   },
