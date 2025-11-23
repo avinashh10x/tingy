@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export const Header = () => {
   return (
-    <header className="w-full border-b border-border bg-card/50 backdrop-blur-sm ">
+    <header className="w-full   backdrop-blur-sm ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
