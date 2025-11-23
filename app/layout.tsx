@@ -27,7 +27,8 @@ gsap.registerPlugin(ScrollTrigger);
 export const metadata: Metadata = {
   metadataBase: new URL("https://tingy.byavi.in"),
   title: {
-    default: "Tingy - Free Online Image Compressor | Compress JPG, PNG, WEBP & AVIF",
+    default:
+      "Tingy - Free Online Image Compressor | Compress JPG, PNG, WEBP & AVIF",
     template: "%s | Tingy - Smart Image Compressor",
   },
   description:
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     "image compressor",
     "online image compressor",
     "free online image compressor",
-    "best online image compressor", 
+    "best online image compressor",
     "smart image compressor",
     "compress images online",
     "reduce image size",
@@ -113,17 +114,17 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/og-image.png", sizes: "any" },
+      { url: "/og-image.png", sizes: "16x16", type: "image/png" },
+      { url: "/og-image.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/og-image.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
       {
         rel: "mask-icon",
-        url: "/safari-pinned-tab.svg",
+        url: "/og-image.svg",
         color: "#3b82f6",
       },
     ],
@@ -146,7 +147,11 @@ export default function RootLayout({
         <ThemeScript />
         <StructuredData />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
