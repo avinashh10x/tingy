@@ -27,7 +27,7 @@ export function PresetSelector({ selectedPreset, onPresetChange, disabled = fals
         </Label>
       </div>
       <Select value={selectedPreset} onValueChange={onPresetChange} disabled={disabled}>
-        <SelectTrigger id="preset" className="w-full">
+        <SelectTrigger id="preset" className="w-full text-left p-6">
           <SelectValue placeholder="Choose a preset" />
         </SelectTrigger>
         <SelectContent>

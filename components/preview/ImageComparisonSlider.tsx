@@ -153,25 +153,25 @@ export function ImageComparisonSlider({
 
         {/* Slider Handle */}
         <div
-          className="absolute inset-y-0 z-10 w-1 cursor-ew-resize bg-primary"
+          className="absolute inset-y-0 z-10 w-0.5 cursor-ew-resize bg-primary"
           style={{ left: `${sliderPosition}%` }}
         >
           {/* Slider Button */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-background shadow-lg">
-              <MoveHorizontal className="h-5 w-5 text-primary" />
+            <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-primary bg-background shadow-lg">
+              <MoveHorizontal className="h-3 w-3 text-primary" />
             </div>
           </div>
 
           {/* Top Arrow */}
-          <div className="absolute left-1/2 top-0 -translate-x-1/2">
+          {/* <div className="absolute left-1/2 top-0 -translate-x-1/2">
             <div className="h-3 w-6 rounded-b-sm bg-primary" />
-          </div>
+          </div> */}
 
           {/* Bottom Arrow */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+          {/* <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
             <div className="h-3 w-6 rounded-t-sm bg-primary" />
-          </div>
+          </div> */}
         </div>
       </div>
 

@@ -23,8 +23,8 @@ export function FormatSelector({ format, onFormatChange, disabled = false }: For
       <Label htmlFor="format" className="text-sm font-medium">
         Output Format
       </Label>
-      <Select value={format} onValueChange={onFormatChange} disabled={disabled}>
-        <SelectTrigger id="format" className="w-full">
+      <Select value={format} onValueChange={onFormatChange} disabled={disabled} >
+        <SelectTrigger id="format" className="w-full text-left p-6">
           <SelectValue placeholder="Select format" />
         </SelectTrigger>
         <SelectContent>
