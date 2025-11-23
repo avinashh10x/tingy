@@ -16,12 +16,12 @@ interface ImagePreviewProps {
   isProcessing?: boolean;
   loaderIndex?: number;
 }
-
+ 
 export function ImagePreview({ result, isProcessing = false, loaderIndex = 0 }: ImagePreviewProps) {
   if (!result && !isProcessing) {
     return (
       <Card className="w-full">
-        <CardContent className="flex h-48 items-center justify-center p-12">
+        <CardContent className="flex min-h-64 items-center justify-center p-12">
           <div className="text-center text-muted-foreground">
             <ImageIcon className="mx-auto mb-4 h-16 w-16 opacity-20" />
             <p className="text-sm">Upload an image and compress it to see results here</p>

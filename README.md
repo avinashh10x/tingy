@@ -27,19 +27,7 @@ Free online image compression tool. Compress JPG, PNG, WEBP, and AVIF images up 
 
 ## 🌐 Live Demo
 
-Visit [https://tingy.vercel.app](https://tingy.vercel.app)
-
-## 📄 License
-
-MIT License - feel free to use this project for your own purposes.
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## 📧 Contact
-
-For any questions or feedback, please open an issue on GitHub.
+Visit [https://tingy-brown.vercel.app/](https://tingy-brown.vercel.app/)
 
 ---
 
