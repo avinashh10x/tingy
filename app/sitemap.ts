@@ -1,14 +1,12 @@
-import { MetadataRoute } from 'next';
-
+import { MetadataRoute } from 'next'
+ 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://tingy.vercel.app'; // Update with your actual domain
-
   return [
     {
-      url: baseUrl,
+      url: 'https://tingy.byavi.in',
       lastModified: new Date(),
-      changeFrequency: 'monthly',
+      changeFrequency: 'weekly',
       priority: 1,
     },
-  ];
+  ]
 }

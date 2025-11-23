@@ -8,50 +8,64 @@ import { StructuredData } from "@/components/StructuredData";
 import "./globals.css";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import gsap from "gsap";
+import { Analytics } from "@vercel/analytics/next";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
-import { Analytics } from "@vercel/analytics/next";
+
 gsap.registerPlugin(ScrollTrigger);
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tingy.vercel.app"), // Update with your actual domain
+  metadataBase: new URL("https://tingy.byavi.in"),
   title: {
-    default:
-      "Tingy - Free Online Image Compressor | Reduce Image Size Without Losing Quality",
-    template: "%s | Tingy",
+    default: "Tingy - Free Online Image Compressor | Compress JPG, PNG, WEBP & AVIF",
+    template: "%s | Tingy - Smart Image Compressor",
   },
   description:
-    "Compress JPG, PNG, WEBP, and AVIF images up to 20MB for free. Smart image optimization with no quality loss. No signup required, completely free forever.",
+    "Compress JPG, PNG, WEBP, and AVIF images up to 20MB instantly. Free online image optimizer with smart presets, no signup required. Reduce file size by up to 80% without losing quality.",
   keywords: [
     "image compressor",
+    "online image compressor",
+    "free online image compressor",
+    "best online image compressor", 
+    "smart image compressor",
     "compress images online",
     "reduce image size",
     "optimize images",
     "image optimization tool",
     "free image compressor",
-    "compress jpg",
-    "compress png",
+    "compress jpg online",
+    "compress png online",
     "compress webp",
+    "compress avif",
     "image converter",
-    "resize images",
+    "resize images online",
     "reduce file size",
     "lossless compression",
+    "lossy compression",
     "photo compressor",
     "online image tool",
+    "tinypng alternative",
+    "image optimizer",
+    "web image compressor",
   ],
-  authors: [{ name: "Tingy", url: "https://tingy.vercel.app" }],
-  creator: "Tingy",
+  authors: [{ name: "Avinash Kumar", url: "https://tingy.byavi.in" }],
+  creator: "Avinash Kumar",
   publisher: "Tingy",
+  applicationName: "Tingy",
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
@@ -63,17 +77,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://tingy.vercel.app",
-    title: "Tingy - Free Online Image Compressor",
+    url: "https://tingy.byavi.in",
+    title: "Tingy - Free Online Image Compressor | Reduce Image Size by 80%",
     description:
-      "Compress images up to 20MB without losing quality. Fast, secure, and completely free. Supports JPG, PNG, WEBP, and AVIF formats.",
+      "Compress JPG, PNG, WEBP & AVIF images up to 20MB for free. Smart presets for web, social media & email. No signup, no ads, completely free forever.",
     siteName: "Tingy",
     images: [
       {
-        url: "/og-image.png", // You'll need to create this
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Tingy - Smart Image Compressor",
+        alt: "Tingy - Smart Image Compressor Tool",
+        type: "image/png",
       },
     ],
   },
@@ -81,18 +96,42 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Tingy - Free Online Image Compressor",
     description:
-      "Compress images up to 20MB without losing quality. Fast, secure, and completely free.",
+      "Compress images up to 20MB without losing quality. Fast, secure, and completely free. Supports JPG, PNG, WEBP, and AVIF formats.",
     images: ["/og-image.png"],
-    creator: "@tingy", // Update with your Twitter handle
+    creator: "@avinashh10x",
+    site: "@avinashh10x",
   },
   alternates: {
-    canonical: "https://tingy.vercel.app",
+    canonical: "https://tingy.byavi.in",
   },
   category: "technology",
+  classification: "Image Compression Tool",
   verification: {
-    google: "11fc782f0c5ff31a", // ← Extract code from filename: google[THIS_PART].html
-    // yandex: 'your-yandex-verification-code',
-    // bing: 'your-bing-verification-code',
+    google: "11fc782f0c5ff31a",
+    // yandex: "your-yandex-code",
+    // bing: "your-bing-code",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg",
+        color: "#3b82f6",
+      },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  other: {
+    "msapplication-TileColor": "#3b82f6",
+    "theme-color": "#ffffff",
   },
 };
 
@@ -106,6 +145,8 @@ export default function RootLayout({
       <head>
         <ThemeScript />
         <StructuredData />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -120,6 +161,7 @@ export default function RootLayout({
             duration={4000}
           />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

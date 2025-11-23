@@ -1,4 +1,4 @@
-import { Image } from "lucide-react";
+import Image from "next/image";
 
 export const Header = () => {
   return (
@@ -7,7 +7,13 @@ export const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-md">
-              <Image className="w-6 h-6 text-primary" />
+              <Image
+                src="/og-image.png"
+                alt="Tingy Logo"
+                width={62}
+                height={62}
+                className="object-contain"
+              />
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text ">
