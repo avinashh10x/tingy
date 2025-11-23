@@ -1,17 +1,13 @@
 "use client";
 
-import { Sparkles, RotateCcw } from "lucide-react";
-import { ImageUploader } from "@/components/ImageUploader";
-import { CompressionControls } from "@/components/CompressionControls";
-import { ImagePreview } from "@/components/ImagePreview";
-import { Button } from "@/components/ui/button";
-import { useImageCompression } from "@/hooks/useImageCompression";
 import gsap from "gsap";
 import { Hero } from "@/components/Hero";
 import { Header } from "@/components/Header";
 import { Features } from "@/components/Features";
 import Footer from "@/components/Footer";
 import CompressionBox from "@/components/CompressionBox";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   return (
