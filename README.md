@@ -27,7 +27,7 @@ Free online image compression tool. Compress JPG, PNG, WEBP, and AVIF images up 
 
 ## 🌐 Live Demo
 
-Visit [https://tingy-brown.vercel.app/](https://tingy-brown.vercel.app/)
+Visit [https://tingy.byavi.in/](https://tingy.byavi.in/)
 
 ---
 

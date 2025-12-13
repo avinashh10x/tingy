@@ -20,14 +20,14 @@ interface ImagePreviewProps {
 export function ImagePreview({ result, isProcessing = false, loaderIndex = 0 }: ImagePreviewProps) {
   if (!result && !isProcessing) {
     return (
-      <Card className="w-full">
-        <CardContent className="flex min-h-64 items-center justify-center p-12">
-          <div className="text-center text-muted-foreground">
+      <div className="w-full duration-300 bg-background outline-2 outline-dashed outline-foreground/20 rounded-lg ">
+        <div className="flex min-h-64 items-center justify-center p-12">
+          <div className="text-center">
             <ImageIcon className="mx-auto mb-4 h-16 w-16 opacity-20" />
             <p className="text-sm">Upload an image and compress it to see results here</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 

@@ -91,7 +91,7 @@ export function useImageCompression() {
           setUploadProgress(progress);
           if (progress === 100 && isLargeFile) {
             toast.info('Processing image...', {
-              description: 'Sharp is optimizing your image',
+              description: 'Tingy is optimizing your image',
               duration: 3000,
             });
           }

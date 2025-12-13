@@ -90,7 +90,7 @@ export function ImageUploader({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-background">
       <div
         {...getRootProps()}
         className={cn(

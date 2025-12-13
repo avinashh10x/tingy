@@ -1,34 +1,42 @@
 import { Shield, Zap, Settings, Smartphone, Lock, Gift } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import HoverSwapText from "./ui/textAnimation1";
+import { SettingsIcon } from "./SettingsIcon";
+import { ZapIcon } from "./ZapIcon";
+import { ShieldCheckIcon } from "./ShieldCheckIcon";
+import { CodeXmlIcon } from "./CodeXmlIcon";
+import { SnowflakeIcon } from "./SnowFlakeIcon";
+import { LockIcon } from "./LockIcon";
 
 const features = [
   {
-    icon: <Zap className="w-6 h-6" />,
+    icon: <ZapIcon className="w-6 h-6" />,
+
     title: "Lightning Fast",
     description: "Compress images in seconds with our optimized algorithms",
   },
   {
-    icon: <Settings className="w-6 h-6" />,
+    icon: <SettingsIcon className="w-6 h-6" />,
     title: "Smart Presets",
     description: "6 presets for web, social, email, print, and more",
   },
   {
-    icon: <Shield className="w-6 h-6" />,
+    icon: <ShieldCheckIcon className="w-6 h-6" />,
     title: "100% Secure",
     description: "Images are processed locally and never stored",
   },
   {
-    icon: <Smartphone className="w-6 h-6" />,
+    icon: <CodeXmlIcon className="w-6 h-6" />,
     title: "Fully Responsive",
     description: "Works perfectly on desktop, tablet, and mobile",
   },
   {
-    icon: <Lock className="w-6 h-6" />,
+    icon: <LockIcon className="w-6 h-6" />,
     title: "Privacy First",
     description: "All processing happens in your browser",
   },
   {
-    icon: <Gift className="w-6 h-6" />,
+    icon: <SnowflakeIcon className="w-6 h-6" />,
     title: "Always Free",
     description: "No hidden fees, no subscriptions, 100% free forever",
   },
@@ -36,7 +44,7 @@ const features = [
 
 export const Features = () => {
   return (
-    <div className="w-full max-w-6xl mx-auto py-16">
+    <div className="w-full max-w-6xl mx-auto py-16 mt-16">
       <div className="text-center mb-12 animate-fade-in">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
           Why Choose Tingy?
@@ -46,17 +54,26 @@ export const Features = () => {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 group">
         {features.map((feature, index) => (
           <Card
             key={index}
-            className="p-6 bg-card hover:shadow-lg transition-all duration-300 animate-fade-in-up border-border"
+            className="    p-6
+    bg-card
+    border-border
+    transition-all duration-300
+    animate-fade-in-up
+    group-hover:opacity-40
+    hover:opacity-100
+  "
             style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center mb-4 text-primary shadow-sm">
+            <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center mb-4 text-primary ">
               {feature.icon}
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-foreground">{feature.title}</h3>
+            <h3 className="text-xl font-semibold mb-2 text-foreground">
+              <HoverSwapText text={feature.title} />
+            </h3>
             <p className="text-muted-foreground">{feature.description}</p>
           </Card>
         ))}
