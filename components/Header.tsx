@@ -1,4 +1,6 @@
 import Image from "next/image";
+import TextAnimation1 from "./ui/textAnimation1";
+import HoverSwapText from "./ui/textAnimation1";
 
 export const Header = () => {
   return (
@@ -6,28 +8,31 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center ">
               <Image
                 src="/og-image.png"
                 alt="Tingy Logo"
                 width={62}
                 height={62}
-                className="object-contain"
+                className="object-contain hover:rotate-90 hover:scale-150 transition-transform duration-500 cursor-pointer hover:drop-shadow-[0px_0px_10px_rgba(0,0,225,.2)]"
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text ">
-                Tingy
+              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text  ">
+                <HoverSwapText
+                  text="Tingy"
+                  className=" font-bold"
+                />
               </h1>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground -mt-2">
                 Smart Image Compressor
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-accent/10  text-sm font-medium rounded-full">
-              100% Free
+            <span className="relative inline-flex items-center px-3 py-1 text-sm font-medium rounded-full">
+              <span className="relative z-10">100% Free</span>
             </span>
           </div>
         </div>

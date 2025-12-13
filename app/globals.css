@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* Google Fonts are loaded from the app layout to avoid @import placement issues */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -45,13 +46,16 @@
 
 :root {
   --radius: 0.625rem;
+  /* subtle background grid settings */
+  --grid-color: rgba(53, 53, 53, 0.1);
+  --grid-size: 48px;
   /* Professional Light Theme - Soft whites with blue accents */
   --background: oklch(0.98 0.002 264);
   --foreground: oklch(0.25 0.015 264);
   --card: oklch(0.995 0.001 264);
   --card-foreground: oklch(0.25 0.015 264);
   --popover: oklch(0.995 0.001 264);
-  --popover-foreground: oklch(0.25 0.015 264);
+  --popover-foreground: oklch(28.094% 0.00003 271.152 / 0.199);
   --primary: oklch(0.55 0.22 264);
   --primary-foreground: oklch(0.99 0.001 264);
   --secondary: oklch(0.92 0.01 264);
@@ -112,6 +116,8 @@
   --sidebar-accent-foreground: oklch(0.92 0.005 264);
   --sidebar-border: oklch(0.32 0.02 264);
   --sidebar-ring: oklch(0.65 0.24 264);
+  /* dark theme grid tweak */
+  --grid-color: rgba(255, 255, 255, 0.02);
 }
 
 @layer base {
@@ -125,6 +131,21 @@
 
 ::-webkit-scrollbar {
   display: none;
+}
+
+body {
+  transition: all 0.5s ease-in-out;
+}
+
+/* Subtle repeating grid background (theme-aware) */
+body {
+  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size),
+    var(--grid-size) var(--grid-size);
+  background-position: 0 0, 0 0;
+  background-repeat: repeat;
+  background-attachment: fixed;
 }
 
 /* Animated Loaders */

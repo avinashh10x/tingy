@@ -1,58 +1,69 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const Hero = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const gradientTextRef = useRef<HTMLSpanElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
 
-  useEffect(() => {
-    const timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const firstLine =
+        headingRef.current?.children[0].querySelector("span");
+      const gradientSpan =
+        gradientTextRef.current?.querySelector("span");
 
-    // Animate main heading with cut/reveal effect
-    if (headingRef.current) {
-      const firstLine = headingRef.current.children[0].querySelector('span');
-      timeline.from(firstLine, {
-        y: '100%',
-        duration: 1,
-        ease: "power4.out",
+      if (!firstLine || !gradientSpan || !subtitleRef.current) return;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          end: "bottom top",
+          toggleActions: "restart none restart none",
+        },
+        defaults: { ease: "power4.out" },
       });
-    }
 
-    // Animate gradient text with cut/reveal effect
-    if (gradientTextRef.current) {
-      const gradientSpan = gradientTextRef.current.querySelector('span');
-      timeline.from(
-        gradientSpan,
-        {
-          y: '100%',
-          duration: 1,
-          ease: "power4.out",
-        },
-        "-=0.9" // Overlap with previous animation
-      );
-    }
+      tl.from(firstLine, {
+        y: "100%",
+        duration: 0.9,
+      })
+        .from(
+          gradientSpan,
+          {
+            y: "100%",
+            duration: 0.9,
+          },
+          "-=0.7"
+        )
+        .from(
+          subtitleRef.current,
+          {
+            opacity: 0,
+            y: 20,
+            duration: 0.8,
+          },
+          "-=0.6"
+        );
+    }, sectionRef);
 
-    // Animate subtitle
-    if (subtitleRef.current) {
-      timeline.from(
-        subtitleRef.current,
-        {
-          opacity: 0,
-          y: 20,
-          duration: 0.8,
-        },
-        "-=0.4"
-      );
-    }
+    return () => ctx.revert();
   }, []);
 
   return (
-    <div className="w-full py-5 text-center h-fit">
-      <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full mb-4 animate-scale-in">
+    <div
+      ref={sectionRef}
+      className="w-full py-5 text-center h-fit"
+    >
+      <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full mb-4">
         <Sparkles className="w-4 h-4" />
         <span className="text-sm font-medium">
           Free Forever • No Sign Up Required
@@ -63,16 +74,15 @@ export const Hero = () => {
         ref={headingRef}
         className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 text-foreground leading-tight"
       >
-        {/* Wrapper with overflow hidden for cut effect */}
         <span className="block mb-2 overflow-hidden p-2">
           <span className="block">Compress Images</span>
         </span>
-        
+
         <span
           ref={gradientTextRef}
-          className="block overflow-hidden p-2"
+          className="block overflow-hidden lg:-mt-[2.7vw]"
         >
-          <span className="block bg-gradient-accent bg-clip-text ">
+          <span className="block bg-gradient-accent bg-clip-text p-2">
             Without Losing Quality
           </span>
         </span>
