@@ -42,7 +42,7 @@ export const Hero = () => {
             y: "100%",
             duration: 0.9,
           },
-          "-=0.7"
+          "-=0.9"
         )
         .from(
           subtitleRef.current,
@@ -51,7 +51,7 @@ export const Hero = () => {
             y: 20,
             duration: 0.8,
           },
-          "-=0.6"
+          "-=0.9"
         );
     }, sectionRef);
 
