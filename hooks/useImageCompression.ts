@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import type { ImageFile, CompressionOptions, CompressionResult } from '@/types/image';
-import { compressImage, createCompressionResult } from '@/lib/actions/compressImage';
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import type {
+  ImageFile,
+  CompressionOptions,
+  CompressionResult,
+} from "@/types/image";
+import {
+  compressImage,
+  createCompressionResult,
+} from "@/lib/actions/compressImage";
 
 /**
  * Custom hook for managing image compression state and operations
@@ -10,12 +17,14 @@ import { compressImage, createCompressionResult } from '@/lib/actions/compressIm
 
 export function useImageCompression() {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
-  const [compressionOptions, setCompressionOptions] = useState<CompressionOptions>({
-    quality: 80,
-    format: 'jpeg',
-    maintainAspectRatio: true,
-  });
-  const [compressionResult, setCompressionResult] = useState<CompressionResult | null>(null);
+  const [compressionOptions, setCompressionOptions] =
+    useState<CompressionOptions>({
+      quality: 80,
+      format: "jpeg",
+      maintainAspectRatio: true,
+    });
+  const [compressionResult, setCompressionResult] =
+    useState<CompressionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loaderIndex, setLoaderIndex] = useState(0);
@@ -47,8 +56,10 @@ export function useImageCompression() {
     setSelectedImage(image);
     setCompressionResult(null);
 
-    toast.success('Image loaded successfully!', {
-      description: `${image.name} (${(image.size / 1024 / 1024).toFixed(2)} MB)`,
+    toast.success("Image loaded successfully!", {
+      description: `${image.name} (${(image.size / 1024 / 1024).toFixed(
+        2
+      )} MB)`,
     });
   };
 
@@ -57,8 +68,8 @@ export function useImageCompression() {
    */
   const handleCompress = async () => {
     if (!selectedImage) {
-      toast.error('No image selected', {
-        description: 'Please upload an image first.',
+      toast.error("No image selected", {
+        description: "Please upload an image first.",
       });
       return;
     }
@@ -76,8 +87,10 @@ export function useImageCompression() {
     const isLargeFile = fileSize >= 4 * 1024 * 1024; // 4MB threshold
 
     if (isLargeFile) {
-      toast.info('Uploading large file...', {
-        description: `${(fileSize / 1024 / 1024).toFixed(1)} MB - This may take a moment`,
+      toast.info("Uploading large file...", {
+        description: `${(fileSize / 1024 / 1024).toFixed(
+          1
+        )} MB - This may take a moment`,
         duration: 5000,
       });
     }
@@ -90,8 +103,8 @@ export function useImageCompression() {
         (progress) => {
           setUploadProgress(progress);
           if (progress === 100 && isLargeFile) {
-            toast.info('Processing image...', {
-              description: 'Tingy is optimizing your image',
+            toast.info("Processing image...", {
+              description: "Tingy is optimizing your image",
               duration: 3000,
             });
           }
@@ -112,17 +125,27 @@ export function useImageCompression() {
 
       setCompressionResult(result);
 
-      toast.success('Image compressed successfully!', {
-        description: `Saved ${result.savings}% • ${(
-          (selectedImage.size - result.processed.size) /
-          1024 /
-          1024
-        ).toFixed(2)} MB smaller`,
-      });
+      if (result.savings <= 0) {
+        toast.info("Nothing to compress", {
+          description:
+            "Compressed output was not smaller — returning original image",
+        });
+      } else {
+        toast.success("Image compressed successfully!", {
+          description: `Saved ${result.savings}% • ${(
+            (selectedImage.size - result.processed.size) /
+            1024 /
+            1024
+          ).toFixed(2)} MB smaller`,
+        });
+      }
     } catch (error) {
-      console.error('Compression error:', error);
-      toast.error('Compression failed', {
-        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      console.error("Compression error:", error);
+      toast.error("Compression failed", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
       });
     } finally {
       setIsProcessing(false);
@@ -146,12 +169,12 @@ export function useImageCompression() {
     setCompressionResult(null);
     setCompressionOptions({
       quality: 80,
-      format: 'jpeg',
+      format: "jpeg",
       maintainAspectRatio: true,
     });
 
-    toast.info('Reset complete', {
-      description: 'Ready for a new image',
+    toast.info("Reset complete", {
+      description: "Ready for a new image",
     });
   };
 
@@ -163,10 +186,10 @@ export function useImageCompression() {
     isProcessing,
     uploadProgress,
     loaderIndex,
-    
+
     // Setters
     setCompressionOptions,
-    
+
     // Actions
     handleImageSelect,
     handleCompress,

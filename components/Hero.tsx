@@ -15,10 +15,8 @@ export const Hero = () => {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const firstLine =
-        headingRef.current?.children[0].querySelector("span");
-      const gradientSpan =
-        gradientTextRef.current?.querySelector("span");
+      const firstLine = headingRef.current?.children[0].querySelector("span");
+      const gradientSpan = gradientTextRef.current?.querySelector("span");
 
       if (!firstLine || !gradientSpan || !subtitleRef.current) return;
 
@@ -59,10 +57,7 @@ export const Hero = () => {
   }, []);
 
   return (
-    <div
-      ref={sectionRef}
-      className="w-full py-5 text-center h-fit"
-    >
+    <div ref={sectionRef} className="w-full py-5 text-center h-fit">
       <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full mb-4">
         <Sparkles className="w-4 h-4" />
         <span className="text-sm font-medium">
@@ -74,13 +69,13 @@ export const Hero = () => {
         ref={headingRef}
         className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 text-foreground leading-tight"
       >
-        <span className="block mb-2 overflow-hidden p-2">
+        <span className="block mb-2 overflow-hidden p-2 relative">
           <span className="block">Compress Images</span>
         </span>
 
         <span
           ref={gradientTextRef}
-          className="block overflow-hidden lg:-mt-[2.7vw]"
+          className="block overflow-hidden lg:-mt-[2.8vw] "
         >
           <span className="block bg-gradient-accent bg-clip-text p-2">
             Without Losing Quality
@@ -92,9 +87,8 @@ export const Hero = () => {
         ref={subtitleRef}
         className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 px-4"
       >
-        Free online tool to compress JPG, PNG, WEBP, and AVIF images up to
-        20MB. Smart presets and powerful controls for perfect results every
-        time.
+        Free online tool to compress JPG, PNG, WEBP, and AVIF images up to 20MB.
+        Smart presets and powerful controls for perfect results every time.
       </p>
     </div>
   );

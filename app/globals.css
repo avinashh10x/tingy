@@ -47,7 +47,7 @@
 :root {
   --radius: 0.625rem;
   /* subtle background grid settings */
-  --grid-color: rgba(53, 53, 53, 0.1);
+  --grid-color: rgba(230, 230, 230, 0.389);
   --grid-size: 48px;
   /* Professional Light Theme - Soft whites with blue accents */
   --background: oklch(0.98 0.002 264);
