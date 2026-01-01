@@ -44,7 +44,7 @@ const features = [
 
 export const Features = () => {
   return (
-    <div className="w-full max-w-6xl mx-auto py-16 mt-16">
+    <div className="w-full mx-auto max-w-7xl  py-16 mt-16 ">
       <div className="text-center mb-12 animate-fade-in">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
           Why Choose Tingy?

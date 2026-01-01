@@ -1,5 +1,9 @@
-import type { ImageFile, CompressionOptions, CompressionResult } from '@/types/image';
-import { upload } from '@vercel/blob/client';
+import type {
+  ImageFile,
+  CompressionOptions,
+  CompressionResult,
+} from "@/types/image";
+import { upload } from "@vercel/blob/client";
 
 interface CompressImageResponse {
   blob: Blob;
@@ -16,9 +20,12 @@ const DIRECT_UPLOAD_THRESHOLD = 4 * 1024 * 1024;
  * @param onProgress - Optional progress callback
  * @returns Promise with blob URL
  */
-async function uploadToBlob(file: File, onProgress?: (progress: number) => void): Promise<string> {
+async function uploadToBlob(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<string> {
   try {
-    console.log('📤 Starting Blob upload:', {
+    console.log("📤 Starting Blob upload:", {
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
@@ -26,27 +33,29 @@ async function uploadToBlob(file: File, onProgress?: (progress: number) => void)
 
     // Use Vercel Blob's client-side upload - bypasses API route payload limit
     const blob = await upload(`temp/${file.name}`, file, {
-      access: 'public',
-      handleUploadUrl: '/api/upload',
+      access: "public",
+      handleUploadUrl: "/api/upload",
       clientPayload: JSON.stringify({ filename: file.name }),
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          const progress = Math.round(
+            (progressEvent.loaded / progressEvent.total) * 100
+          );
           console.log(`📊 Upload progress: ${progress}%`);
           onProgress(progress);
         }
       },
     });
 
-    console.log('✅ Blob upload complete:', {
+    console.log("✅ Blob upload complete:", {
       url: blob.url,
       pathname: blob.pathname,
     });
 
     return blob.url;
   } catch (error) {
-    console.error('❌ Blob upload failed:', error);
-    throw new Error('Failed to upload image to cloud storage');
+    console.error("❌ Blob upload failed:", error);
+    throw new Error("Failed to upload image to cloud storage");
   }
 }
 
@@ -65,26 +74,26 @@ export async function compressImage(
   const fileSize = image.file.size;
   const isLargeFile = fileSize >= DIRECT_UPLOAD_THRESHOLD;
 
-  console.log('🔍 Compression routing:', {
+  console.log("🔍 Compression routing:", {
     fileSize,
-    fileSizeMB: (fileSize / 1024 / 1024).toFixed(2) + ' MB',
+    fileSizeMB: (fileSize / 1024 / 1024).toFixed(2) + " MB",
     threshold: DIRECT_UPLOAD_THRESHOLD,
-    thresholdMB: (DIRECT_UPLOAD_THRESHOLD / 1024 / 1024).toFixed(2) + ' MB',
+    thresholdMB: (DIRECT_UPLOAD_THRESHOLD / 1024 / 1024).toFixed(2) + " MB",
     isLargeFile,
     willUseBlob: isLargeFile,
   });
 
   if (isLargeFile) {
-    console.log('📤 Using BLOB upload path (large file)');
+    console.log("📤 Using BLOB upload path (large file)");
     // Large files: Upload to Vercel Blob first, then compress
     const blobUrl = await uploadToBlob(image.file, onUploadProgress);
-    console.log('✅ Uploaded to Blob:', blobUrl);
+    console.log("✅ Uploaded to Blob:", blobUrl);
 
     // Send blob URL to compression API
-    const response = await fetch('/api/compress', {
-      method: 'POST',
+    const response = await fetch("/api/compress", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         blobUrl,
@@ -98,36 +107,43 @@ export async function compressImage(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.details || errorData.error || 'Compression failed');
+      throw new Error(
+        errorData.details || errorData.error || "Compression failed"
+      );
     }
 
     const blob = await response.blob();
     return { blob, headers: response.headers };
   } else {
-    console.log('⚡ Using DIRECT upload path (small file)');
+    console.log("⚡ Using DIRECT upload path (small file)");
     // Small files: Direct upload (faster)
     const formData = new FormData();
-    formData.append('file', image.file);
-    formData.append('format', options.format);
-    formData.append('quality', options.quality.toString());
-    formData.append('maintainAspectRatio', options.maintainAspectRatio.toString());
+    formData.append("file", image.file);
+    formData.append("format", options.format);
+    formData.append("quality", options.quality.toString());
+    formData.append(
+      "maintainAspectRatio",
+      options.maintainAspectRatio.toString()
+    );
 
     if (options.width) {
-      formData.append('width', options.width.toString());
+      formData.append("width", options.width.toString());
     }
     if (options.height) {
-      formData.append('height', options.height.toString());
+      formData.append("height", options.height.toString());
     }
 
     // Call API
-    const response = await fetch('/api/compress', {
-      method: 'POST',
+    const response = await fetch("/api/compress", {
+      method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.details || errorData.error || 'Compression failed');
+      throw new Error(
+        errorData.details || errorData.error || "Compression failed"
+      );
     }
 
     // Get compressed image blob
@@ -156,25 +172,49 @@ export function createCompressionResult(
   options: CompressionOptions,
   totalTime: number
 ): CompressionResult {
-  const processingTime = parseInt(headers.get('X-Processing-Time') || '0');
-  const compressedSize = parseInt(headers.get('X-Compressed-Size') || '0');
-  const outputWidth = parseInt(headers.get('X-Output-Width') || '0');
-  const outputHeight = parseInt(headers.get('X-Output-Height') || '0');
-
+  const processingTime = parseInt(headers.get("X-Processing-Time") || "0");
+  const compressedSize = parseInt(headers.get("X-Compressed-Size") || "0");
+  const outputWidth = parseInt(headers.get("X-Output-Width") || "0");
+  const outputHeight = parseInt(headers.get("X-Output-Height") || "0");
   const url = URL.createObjectURL(blob);
-  const size = compressedSize || blob.size;
+  const compressed = compressedSize || blob.size;
+
+  // If compressed output is not smaller than original, return the original image
+  if (compressed >= originalImage.size) {
+    const originalBlob = originalImage.file; // File is a Blob
+    const originalUrl =
+      originalImage.preview || URL.createObjectURL(originalBlob);
+
+    const result: CompressionResult = {
+      original: originalImage,
+      processed: {
+        blob: originalBlob,
+        url: originalUrl,
+        size: originalImage.size,
+        format: (originalImage.type.split("/")[1] as any) || options.format,
+        width: outputWidth || undefined,
+        height: outputHeight || undefined,
+      },
+      savings: 0,
+      processingTime: processingTime || totalTime,
+    };
+
+    return result;
+  }
 
   const result: CompressionResult = {
     original: originalImage,
     processed: {
       blob,
       url,
-      size,
+      size: compressed,
       format: options.format,
       width: outputWidth || undefined,
       height: outputHeight || undefined,
     },
-    savings: Math.round(((originalImage.size - size) / originalImage.size) * 100),
+    savings: Math.round(
+      ((originalImage.size - compressed) / originalImage.size) * 100
+    ),
     processingTime: processingTime || totalTime,
   };
 

@@ -5,10 +5,12 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { ThemeScript } from "@/components/theme-script";
 import { StructuredData } from "@/components/StructuredData";
+import Footer from "@/components/Footer";
 import "./globals.css";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import gsap from "gsap";
 import { Analytics } from "@vercel/analytics/next";
+import { Separator } from "@/components/ui/separator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -160,6 +162,16 @@ export default function RootLayout({
       >
         <ThemeProvider defaultTheme="light" storageKey="tingy-theme">
           {children}
+
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <Separator
+              orientation="horizontal"
+              // className="w-40"
+              style={{ width:"100%" }}
+            />
+          </div>
+
+          <Footer />
           <ThemeSwitcher />
           <Toaster
             position="bottom-right"
