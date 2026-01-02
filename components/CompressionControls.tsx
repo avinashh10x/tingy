@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Settings2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PresetSelector } from '@/components/controls/PresetSelector';
-import { FormatSelector } from '@/components/controls/FormatSelector';
-import { QualitySlider } from '@/components/controls/QualitySlider';
-import { OutputEstimator } from '@/components/controls/OutputEstimator';
-import { ResizeControls } from '@/components/controls/ResizeControls';
-import { TargetSizeControl } from '@/components/controls/TargetSizeControl';
-import { PRESETS, type PresetType } from '@/lib/constants/presets';
-import type { CompressionOptions, ImageFormat } from '@/types/image';
+import { useState } from "react";
+import { Settings2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PresetSelector } from "@/components/controls/PresetSelector";
+import { FormatSelector } from "@/components/controls/FormatSelector";
+import { QualitySlider } from "@/components/controls/QualitySlider";
+import { OutputEstimator } from "@/components/controls/OutputEstimator";
+import { ResizeControls } from "@/components/controls/ResizeControls";
+import { TargetSizeControl } from "@/components/controls/TargetSizeControl";
+import { PRESETS, type PresetType } from "@/lib/constants/presets";
+import type { CompressionOptions, ImageFormat } from "@/types/image";
 
 interface CompressionControlsProps {
   options: CompressionOptions;
@@ -25,25 +25,29 @@ export function CompressionControls({
   disabled = false,
   originalSize,
 }: CompressionControlsProps) {
-  const [localWidth, setLocalWidth] = useState<string>(options.width?.toString() || '');
-  const [localHeight, setLocalHeight] = useState<string>(options.height?.toString() || '');
-  const [selectedPreset, setSelectedPreset] = useState<PresetType>('custom');
+  const [localWidth, setLocalWidth] = useState<string>(
+    options.width?.toString() || ""
+  );
+  const [localHeight, setLocalHeight] = useState<string>(
+    options.height?.toString() || ""
+  );
+  const [selectedPreset, setSelectedPreset] = useState<PresetType>("web");
   const [enableTargetSize, setEnableTargetSize] = useState(false);
-  const [targetSizeKB, setTargetSizeKB] = useState<string>('');
+  const [targetSizeKB, setTargetSizeKB] = useState<string>("");
 
   const handleQualityChange = (value: number[]) => {
-    setSelectedPreset('custom');
+    setSelectedPreset("custom");
     onOptionsChange({ ...options, quality: value[0] });
   };
 
   const handleFormatChange = (format: ImageFormat) => {
-    setSelectedPreset('custom');
+    setSelectedPreset("custom");
     onOptionsChange({ ...options, format });
   };
 
   const handlePresetChange = (preset: PresetType) => {
     setSelectedPreset(preset);
-    if (preset === 'custom') return;
+    if (preset === "custom") return;
 
     const presetConfig = PRESETS[preset];
     // Only apply quality and format from preset, keep user's dimensions
@@ -61,7 +65,7 @@ export function CompressionControls({
     const numValue = parseInt(value);
     if (!isNaN(numValue) && numValue > 0) {
       onOptionsChange({ ...options, width: numValue });
-    } else if (value === '') {
+    } else if (value === "") {
       onOptionsChange({ ...options, width: undefined });
     }
   };
@@ -71,18 +75,21 @@ export function CompressionControls({
     const numValue = parseInt(value);
     if (!isNaN(numValue) && numValue > 0) {
       onOptionsChange({ ...options, height: numValue });
-    } else if (value === '') {
+    } else if (value === "") {
       onOptionsChange({ ...options, height: undefined });
     }
   };
 
   const toggleAspectRatio = () => {
-    onOptionsChange({ ...options, maintainAspectRatio: !options.maintainAspectRatio });
+    onOptionsChange({
+      ...options,
+      maintainAspectRatio: !options.maintainAspectRatio,
+    });
   };
 
   const clearDimensions = () => {
-    setLocalWidth('');
-    setLocalHeight('');
+    setLocalWidth("");
+    setLocalHeight("");
     onOptionsChange({ ...options, width: undefined, height: undefined });
   };
 
@@ -118,7 +125,12 @@ export function CompressionControls({
         />
 
         {/* Output Estimator */}
-        {originalSize && <OutputEstimator originalSize={originalSize} quality={options.quality} />}
+        {originalSize && (
+          <OutputEstimator
+            originalSize={originalSize}
+            quality={options.quality}
+          />
+        )}
 
         {/* Resize Controls */}
         <ResizeControls

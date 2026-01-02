@@ -19,8 +19,9 @@ export function useImageCompression() {
   const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
   const [compressionOptions, setCompressionOptions] =
     useState<CompressionOptions>({
-      quality: 80,
-      format: "jpeg",
+      // Default to the 'web' preset (webp) for smaller, web-optimized output
+      quality: 82,
+      format: "webp",
       maintainAspectRatio: true,
     });
   const [compressionResult, setCompressionResult] =
@@ -168,8 +169,9 @@ export function useImageCompression() {
     setSelectedImage(null);
     setCompressionResult(null);
     setCompressionOptions({
-      quality: 80,
-      format: "jpeg",
+      // Reset back to the default 'web' preset
+      quality: 82,
+      format: "webp",
       maintainAspectRatio: true,
     });
 

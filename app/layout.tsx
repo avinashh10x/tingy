@@ -11,6 +11,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import gsap from "gsap";
 import { Analytics } from "@vercel/analytics/next";
 import { Separator } from "@/components/ui/separator";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -167,7 +168,7 @@ export default function RootLayout({
             <Separator
               orientation="horizontal"
               // className="w-40"
-              style={{ width:"100%" }}
+              style={{ width: "100%" }}
             />
           </div>
 
@@ -182,6 +183,7 @@ export default function RootLayout({
         </ThemeProvider>
         <Analytics />
       </body>
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
     </html>
   );
 }
