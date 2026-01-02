@@ -27,7 +27,7 @@ export function CompressionControls({
 }: CompressionControlsProps) {
   const [localWidth, setLocalWidth] = useState<string>(options.width?.toString() || '');
   const [localHeight, setLocalHeight] = useState<string>(options.height?.toString() || '');
-  const [selectedPreset, setSelectedPreset] = useState<PresetType>('custom');
+  const [selectedPreset, setSelectedPreset] = useState<PresetType>('web');
   const [enableTargetSize, setEnableTargetSize] = useState(false);
   const [targetSizeKB, setTargetSizeKB] = useState<string>('');
 
