@@ -1,200 +1,250 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 import type {
   ImageFile,
   CompressionOptions,
   CompressionResult,
+  QueuedImage,
+  CompressionStatus,
 } from "@/types/image";
 import {
   compressImage,
   createCompressionResult,
 } from "@/lib/actions/compressImage";
-
-/**
- * Custom hook for managing image compression state and operations
- * Handles image selection, compression, reset, and memory cleanup
- */
+import { createDownloadFilename } from "@/lib/image-utils";
 
 export function useImageCompression() {
-  const [selectedImage, setSelectedImage] = useState<ImageFile | null>(null);
+  // Queue State
+  const [images, setImages] = useState<QueuedImage[]>([]);
+  const [activeImageId, setActiveImageId] = useState<string | null>(null);
+
+  // Processing State
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingQueue, setProcessingQueue] = useState<string[]>([]); // IDs currently processing
+
+  // Global Options
   const [compressionOptions, setCompressionOptions] =
     useState<CompressionOptions>({
-      // Default to the 'web' preset (webp) for smaller, web-optimized output
       quality: 82,
       format: "webp",
       maintainAspectRatio: true,
     });
-  const [compressionResult, setCompressionResult] =
-    useState<CompressionResult | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [loaderIndex, setLoaderIndex] = useState(0);
 
-  // Cleanup blob URLs when specific images change (but not on every render)
+  // Derived State
+  const activeImage = images.find((args) => args.id === activeImageId) || null;
+  const completedCount = images.filter(
+    (img) => img.status === "completed"
+  ).length;
+  const totalCount = images.length;
+
+  // Refs for cleanup
+  const activeImageRef = useRef<string | null>(null);
   useEffect(() => {
-    // Cleanup OLD compression result when a NEW one is created
-    // But keep the original image preview URL intact
-    return () => {
-      if (compressionResult?.processed.url) {
-        URL.revokeObjectURL(compressionResult.processed.url);
-      }
-    };
-  }, [compressionResult?.processed.url]); // Only when processed URL changes
+    activeImageRef.current = activeImageId;
+  }, [activeImageId]);
 
-  // Cleanup original image preview only when image changes or unmounts
+  // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
-      if (selectedImage?.preview) {
-        URL.revokeObjectURL(selectedImage.preview);
-      }
+      images.forEach((img) => {
+        if (img.preview) URL.revokeObjectURL(img.preview);
+        if (img.result?.processed.url)
+          URL.revokeObjectURL(img.result.processed.url);
+      });
     };
-  }, [selectedImage?.preview]); // Only when preview URL changes
+  }, []);
 
-  /**
-   * Handle image selection from uploader
-   */
-  const handleImageSelect = (image: ImageFile) => {
-    setSelectedImage(image);
-    setCompressionResult(null);
+  // --- Actions ---
 
-    toast.success("Image loaded successfully!", {
-      description: `${image.name} (${(image.size / 1024 / 1024).toFixed(
-        2
-      )} MB)`,
+  const addImages = useCallback((files: File[]) => {
+    const newImages: QueuedImage[] = files.map((file) => ({
+      id: uuidv4(),
+      file,
+      preview: URL.createObjectURL(file),
+      originalSize: file.size,
+      status: "idle",
+      progress: 0,
+    }));
+
+    setImages((prev) => {
+      const updated = [...prev, ...newImages];
+      // If no active image, set the first new one as active
+      if (!activeImageRef.current && newImages.length > 0) {
+        setActiveImageId(newImages[0].id);
+      }
+      return updated;
     });
-  };
 
-  /**
-   * Compress the selected image with current options
-   */
-  const handleCompress = async () => {
-    if (!selectedImage) {
-      toast.error("No image selected", {
-        description: "Please upload an image first.",
+    toast.success(`Added ${files.length} image${files.length > 1 ? "s" : ""}`);
+  }, []);
+
+  const removeImage = useCallback((id: string) => {
+    setImages((prev) => {
+      const imgToRemove = prev.find((img) => img.id === id);
+      if (imgToRemove) {
+        URL.revokeObjectURL(imgToRemove.preview);
+        if (imgToRemove.result?.processed.url) {
+          URL.revokeObjectURL(imgToRemove.result.processed.url);
+        }
+      }
+
+      const filtered = prev.filter((img) => img.id !== id);
+
+      // If we removed the active image, pick a new one
+      if (activeImageRef.current === id) {
+        const nextActive = filtered[0]?.id || null;
+        setActiveImageId(nextActive);
+      }
+
+      return filtered;
+    });
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setImages((prev) => {
+      prev.forEach((img) => {
+        URL.revokeObjectURL(img.preview);
+        if (img.result?.processed.url) {
+          URL.revokeObjectURL(img.result.processed.url);
+        }
       });
-      return;
-    }
+      return [];
+    });
+    setActiveImageId(null);
+    setIsProcessing(false);
+  }, []);
 
-    // Don't clean up previous result here - let useEffect handle it
-    // This prevents revoking URLs while they're still being displayed
+  // --- Compression Logic ---
 
-    setIsProcessing(true);
-    setUploadProgress(0);
-    setLoaderIndex((prev) => prev + 1); // Increment to get next loader
+  const processImage = async (image: QueuedImage) => {
+    // Update status to processing
+    setImages((prev) =>
+      prev.map((img) =>
+        img.id === image.id
+          ? { ...img, status: "processing", progress: 0 }
+          : img
+      )
+    );
+
     const startTime = Date.now();
-
-    // Show upload progress for large files
-    const fileSize = selectedImage.file.size;
-    const isLargeFile = fileSize >= 4 * 1024 * 1024; // 4MB threshold
-
-    if (isLargeFile) {
-      toast.info("Uploading large file...", {
-        description: `${(fileSize / 1024 / 1024).toFixed(
-          1
-        )} MB - This may take a moment`,
-        duration: 5000,
-      });
-    }
+    const isLargeFile = image.file.size >= 4 * 1024 * 1024;
 
     try {
-      // Call compression API with progress callback
+      // ✅ DEBUG: Log compression options being sent
+      console.log("🔧 Compression Options:", {
+        format: compressionOptions.format,
+        quality: compressionOptions.quality,
+        width: compressionOptions.width,
+        height: compressionOptions.height,
+        maintainAspectRatio: compressionOptions.maintainAspectRatio,
+      });
+
       const { blob, headers } = await compressImage(
-        selectedImage,
+        {
+          ...image,
+          name: image.file.name,
+          size: image.file.size,
+          type: image.file.type,
+        },
         compressionOptions,
         (progress) => {
-          setUploadProgress(progress);
-          if (progress === 100 && isLargeFile) {
-            toast.info("Processing image...", {
-              description: "Tingy is optimizing your image",
-              duration: 3000,
-            });
-          }
+          setImages((prev) =>
+            prev.map((img) =>
+              img.id === image.id ? { ...img, progress } : img
+            )
+          );
         }
       );
 
-      // Calculate total processing time (including network)
       const totalTime = Date.now() - startTime;
-
-      // Create result object
       const result = createCompressionResult(
-        selectedImage,
+        {
+          ...image,
+          name: image.file.name,
+          size: image.file.size,
+          type: image.file.type,
+        },
         blob,
         headers,
         compressionOptions,
         totalTime
       );
 
-      setCompressionResult(result);
-
-      if (result.savings <= 0) {
-        toast.info("Nothing to compress", {
-          description:
-            "Compressed output was not smaller — returning original image",
-        });
-      } else {
-        toast.success("Image compressed successfully!", {
-          description: `Saved ${result.savings}% • ${(
-            (selectedImage.size - result.processed.size) /
-            1024 /
-            1024
-          ).toFixed(2)} MB smaller`,
-        });
-      }
-    } catch (error) {
-      console.error("Compression error:", error);
-      toast.error("Compression failed", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred",
+      // ✅ DEBUG: Verify format in result
+      console.log("✅ Compression Result:", {
+        originalFormat: image.file.type,
+        requestedFormat: compressionOptions.format,
+        resultFormat: result.processed.format,
+        filename: createDownloadFilename(
+          image.file.name,
+          result.processed.format
+        ),
       });
-    } finally {
-      setIsProcessing(false);
-      setUploadProgress(0);
+
+      // Update with result
+      setImages((prev) =>
+        prev.map((img) =>
+          img.id === image.id
+            ? { ...img, status: "completed", result, progress: 100 }
+            : img
+        )
+      );
+    } catch (error) {
+      console.error("❌ Compression failed for:", image.file.name, error);
+
+      // ✅ STRICT: Remove failed images from queue instead of showing error
+      setImages((prev) => prev.filter((img) => img.id !== image.id));
+
+      // Show toast notification
+      toast.error(`Failed to compress: ${image.file.name}`, {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
-  /**
-   * Reset the compression state and cleanup blob URLs
-   */
-  const handleReset = () => {
-    // Cleanup blob URLs
-    if (selectedImage?.preview) {
-      URL.revokeObjectURL(selectedImage.preview);
-    }
-    if (compressionResult?.processed.url) {
-      URL.revokeObjectURL(compressionResult.processed.url);
+  const startCompression = useCallback(async () => {
+    setIsProcessing(true);
+
+    // Filter images that need processing (idle or error)
+    const queue = images.filter(
+      (img) => img.status === "idle" || img.status === "error"
+    );
+
+    // Concurrency Limit: 3
+    const CONCURRENCY = 3;
+    const chunks = [];
+
+    for (let i = 0; i < queue.length; i += CONCURRENCY) {
+      chunks.push(queue.slice(i, i + CONCURRENCY));
     }
 
-    setSelectedImage(null);
-    setCompressionResult(null);
-    setCompressionOptions({
-      // Reset back to the default 'web' preset
-      quality: 82,
-      format: "webp",
-      maintainAspectRatio: true,
-    });
+    for (const chunk of chunks) {
+      await Promise.all(chunk.map((img) => processImage(img)));
+    }
 
-    toast.info("Reset complete", {
-      description: "Ready for a new image",
-    });
-  };
+    setIsProcessing(false);
+    toast.success("Batch compression complete!");
+  }, [images, compressionOptions]);
 
   return {
     // State
-    selectedImage,
+    images,
+    activeImage,
+    activeImageId,
     compressionOptions,
-    compressionResult,
     isProcessing,
-    uploadProgress,
-    loaderIndex,
+    completedCount,
+    totalCount,
 
     // Setters
     setCompressionOptions,
+    setActiveImageId,
 
     // Actions
-    handleImageSelect,
-    handleCompress,
-    handleReset,
+    addImages,
+    removeImage,
+    clearAll,
+    startCompression,
   };
 }

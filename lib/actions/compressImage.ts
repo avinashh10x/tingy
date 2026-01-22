@@ -74,6 +74,16 @@ export async function compressImage(
   const fileSize = image.file.size;
   const isLargeFile = fileSize >= DIRECT_UPLOAD_THRESHOLD;
 
+  // ✅ DEBUG: Log options being sent to API
+  console.log("📤 Sending to API:", {
+    format: options.format,
+    quality: options.quality,
+    width: options.width,
+    height: options.height,
+    maintainAspectRatio: options.maintainAspectRatio,
+    isLargeFile,
+  });
+
   console.log("🔍 Compression routing:", {
     fileSize,
     fileSizeMB: (fileSize / 1024 / 1024).toFixed(2) + " MB",
@@ -102,6 +112,10 @@ export async function compressImage(
         width: options.width,
         height: options.height,
         maintainAspectRatio: options.maintainAspectRatio,
+        // Target size parameters
+        targetSizeEnabled: options.targetSizeEnabled,
+        targetSize: options.targetSize,
+        targetSizeUnit: options.targetSizeUnit,
       }),
     });
 
@@ -131,6 +145,16 @@ export async function compressImage(
     }
     if (options.height) {
       formData.append("height", options.height.toString());
+    }
+    // Target size parameters
+    if (options.targetSizeEnabled) {
+      formData.append("targetSizeEnabled", "true");
+      if (options.targetSize) {
+        formData.append("targetSize", options.targetSize.toString());
+      }
+      if (options.targetSizeUnit) {
+        formData.append("targetSizeUnit", options.targetSizeUnit);
+      }
     }
 
     // Call API
@@ -179,36 +203,32 @@ export function createCompressionResult(
   const url = URL.createObjectURL(blob);
   const compressed = compressedSize || blob.size;
 
-  // If compressed output is not smaller than original, return the original image
-  if (compressed >= originalImage.size) {
-    const originalBlob = originalImage.file; // File is a Blob
-    const originalUrl =
-      originalImage.preview || URL.createObjectURL(originalBlob);
+  // ✅ STRICT: Always use the requested format from options
+  const outputFormat = options.format;
 
-    const result: CompressionResult = {
-      original: originalImage,
-      processed: {
-        blob: originalBlob,
-        url: originalUrl,
-        size: originalImage.size,
-        format: (originalImage.type.split("/")[1] as any) || options.format,
-        width: outputWidth || undefined,
-        height: outputHeight || undefined,
-      },
-      savings: 0,
-      processingTime: processingTime || totalTime,
-    };
+  console.log("📦 Creating Result:", {
+    requestedFormat: options.format,
+    outputFormat,
+    blobType: blob.type,
+    quality: options.quality,
+    originalSize: originalImage.size,
+    compressedSize: compressed,
+    sizeDiff:
+      (((compressed - originalImage.size) / originalImage.size) * 100).toFixed(
+        1
+      ) + "%",
+  });
 
-    return result;
-  }
-
+  // ✅ ALWAYS return compressed image in requested format
+  // Quality represents VISUAL quality, not file size
+  // Format conversion is independent of size comparison
   const result: CompressionResult = {
     original: originalImage,
     processed: {
       blob,
       url,
       size: compressed,
-      format: options.format,
+      format: outputFormat, // ✅ STRICT: Always use requested format
       width: outputWidth || undefined,
       height: outputHeight || undefined,
     },

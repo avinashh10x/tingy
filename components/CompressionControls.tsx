@@ -26,14 +26,15 @@ export function CompressionControls({
   originalSize,
 }: CompressionControlsProps) {
   const [localWidth, setLocalWidth] = useState<string>(
-    options.width?.toString() || ""
+    options.width?.toString() || "",
   );
   const [localHeight, setLocalHeight] = useState<string>(
-    options.height?.toString() || ""
+    options.height?.toString() || "",
   );
   const [selectedPreset, setSelectedPreset] = useState<PresetType>("web");
   const [enableTargetSize, setEnableTargetSize] = useState(false);
-  const [targetSizeKB, setTargetSizeKB] = useState<string>("");
+  const [targetSize, setTargetSize] = useState<string>("");
+  const [targetSizeUnit, setTargetSizeUnit] = useState<"KB" | "MB">("KB");
 
   const handleQualityChange = (value: number[]) => {
     setSelectedPreset("custom");
@@ -93,6 +94,37 @@ export function CompressionControls({
     onOptionsChange({ ...options, width: undefined, height: undefined });
   };
 
+  const handleTargetSizeEnabledChange = (enabled: boolean) => {
+    setEnableTargetSize(enabled);
+    onOptionsChange({
+      ...options,
+      targetSizeEnabled: enabled,
+      targetSize: enabled ? parseFloat(targetSize) || undefined : undefined,
+      targetSizeUnit: enabled ? targetSizeUnit : undefined,
+    });
+  };
+
+  const handleTargetSizeChange = (value: string) => {
+    setTargetSize(value);
+    if (enableTargetSize) {
+      onOptionsChange({
+        ...options,
+        targetSize: parseFloat(value) || undefined,
+        targetSizeUnit,
+      });
+    }
+  };
+
+  const handleTargetSizeUnitChange = (unit: "KB" | "MB") => {
+    setTargetSizeUnit(unit);
+    if (enableTargetSize) {
+      onOptionsChange({
+        ...options,
+        targetSizeUnit: unit,
+      });
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -116,12 +148,12 @@ export function CompressionControls({
           disabled={disabled}
         />
 
-        {/* Quality Slider */}
+        {/* Quality Slider - Disabled when target size is enabled */}
         <QualitySlider
           quality={options.quality}
           format={options.format}
           onQualityChange={handleQualityChange}
-          disabled={disabled}
+          disabled={disabled || enableTargetSize}
         />
 
         {/* Output Estimator */}
@@ -129,6 +161,7 @@ export function CompressionControls({
           <OutputEstimator
             originalSize={originalSize}
             quality={options.quality}
+            format={options.format}
           />
         )}
 
@@ -147,10 +180,12 @@ export function CompressionControls({
         {/* Target File Size (Advanced) */}
         <TargetSizeControl
           enabled={enableTargetSize}
-          targetSizeKB={targetSizeKB}
+          targetSize={targetSize}
+          targetSizeUnit={targetSizeUnit}
           originalSize={originalSize}
-          onEnabledChange={setEnableTargetSize}
-          onTargetSizeChange={setTargetSizeKB}
+          onEnabledChange={handleTargetSizeEnabledChange}
+          onTargetSizeChange={handleTargetSizeChange}
+          onUnitChange={handleTargetSizeUnitChange}
           disabled={disabled}
         />
       </CardContent>
