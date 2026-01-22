@@ -1,30 +1,36 @@
-'use client';
+"use client";
 
-import { CheckCircle2, ImageIcon } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { calculateSavings, createDownloadFilename } from '@/lib/image-utils';
-import type { CompressionResult } from '@/types/image';
-import { CompressionStats } from '@/components/preview/CompressionStats';
-import { CompressionProgress } from '@/components/preview/CompressionProgress';
-import { ImageComparisonSlider } from '@/components/preview/ImageComparisonSlider';
-import { ImageDetails } from '@/components/preview/ImageDetails';
-import { DownloadSection } from '@/components/preview/DownloadSection';
-import { AnimatedLoader } from '@/components/preview/AnimatedLoader';
+import { CheckCircle2, ImageIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { calculateSavings, createDownloadFilename } from "@/lib/image-utils";
+import type { CompressionResult } from "@/types/image";
+import { CompressionStats } from "@/components/preview/CompressionStats";
+import { CompressionProgress } from "@/components/preview/CompressionProgress";
+import { ImageComparisonSlider } from "@/components/preview/ImageComparisonSlider";
+import { ImageDetails } from "@/components/preview/ImageDetails";
+import { DownloadSection } from "@/components/preview/DownloadSection";
+import { AnimatedLoader } from "@/components/preview/AnimatedLoader";
 
 interface ImagePreviewProps {
   result: CompressionResult | null;
   isProcessing?: boolean;
   loaderIndex?: number;
 }
- 
-export function ImagePreview({ result, isProcessing = false, loaderIndex = 0 }: ImagePreviewProps) {
+
+export function ImagePreview({
+  result,
+  isProcessing = false,
+  loaderIndex = 0,
+}: ImagePreviewProps) {
   if (!result && !isProcessing) {
     return (
       <div className="w-full duration-300 bg-background outline-2 outline-dashed outline-foreground/20 rounded-lg ">
         <div className="flex min-h-64 items-center justify-center p-12">
           <div className="text-center">
             <ImageIcon className="mx-auto mb-4 h-16 w-16 opacity-20" />
-            <p className="text-sm">Upload an image and compress it to see results here</p>
+            <p className="text-sm">
+              Upload an image and compress it to see results here
+            </p>
           </div>
         </div>
       </div>
@@ -47,10 +53,13 @@ export function ImagePreview({ result, isProcessing = false, loaderIndex = 0 }: 
   if (!result) return null;
 
   const savings = calculateSavings(result.original.size, result.processed.size);
-  const downloadFilename = createDownloadFilename(result.original.name, result.processed.format);
+  const downloadFilename = createDownloadFilename(
+    result.original.name,
+    result.processed.format
+  );
 
   return (
-    <div className="sticky top-8">
+    <div className="sticky top-8 w-full max-w-full">
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">

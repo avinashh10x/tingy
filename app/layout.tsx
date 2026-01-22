@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
+import { ThemedToaster } from "@/components/ThemedToaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { ThemeScript } from "@/components/theme-script";
@@ -31,36 +31,55 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tingy.byavi.in"),
   title: {
     default:
-      "Tingy - Free Online Image Compressor | Compress JPG, PNG, WEBP & AVIF",
-    template: "%s | Tingy - Smart Image Compressor",
+      "Tingy - Free Image Compressor Online | Compress JPG, PNG, WEBP & AVIF | Best TinyPNG Alternative",
+    template: "%s | Tingy - Free Image Compression Tool",
   },
   description:
-    "Compress JPG, PNG, WEBP, and AVIF images up to 20MB instantly. Free online image optimizer with smart presets, no signup required. Reduce file size by up to 80% without losing quality.",
+    "Free online image compressor - Compress JPG, PNG, WEBP, and AVIF images up to 20MB instantly. Best TinyPNG alternative with smart presets, batch compression, and no signup required. Reduce file size by up to 80% without losing quality. Privacy-focused image optimizer.",
   keywords: [
     "image compressor",
     "online image compressor",
     "free online image compressor",
     "best online image compressor",
-    "smart image compressor",
-    "compress images online",
-    "reduce image size",
-    "optimize images",
-    "image optimization tool",
-    "free image compressor",
+    "free image compression",
+    "compress images online free",
+    "image optimizer",
     "compress jpg online",
     "compress png online",
-    "compress webp",
-    "compress avif",
-    "image converter",
+    "compress webp online",
+    "compress avif online",
+    "compress jpeg online",
+    "reduce image size",
+    "reduce image file size",
+    "optimize images online",
+    "image optimization tool",
+    "photo compressor",
+    "picture compressor",
+    "bulk image compressor",
+    "batch image compression",
+    "tinypng alternative",
+    "compressor.io alternative",
+    "optimizilla alternative",
+    "squoosh alternative",
+    "image compression without quality loss",
+    "lossless image compression",
+    "lossy compression",
+    "web image optimizer",
     "resize images online",
     "reduce file size",
-    "lossless compression",
-    "lossy compression",
-    "photo compressor",
-    "online image tool",
-    "tinypng alternative",
-    "image optimizer",
-    "web image compressor",
+    "compress images for web",
+    "compress images for website",
+    "compress images for email",
+    "compress photos online",
+    "free photo compressor",
+    "no signup image compressor",
+    "privacy image compressor",
+    "client side image compression",
+    "fast image compressor",
+    "smart image compression",
+    "image compression tool",
+    "online photo optimizer",
+    "compress pictures online free",
   ],
   authors: [{ name: "Avinash Kumar", url: "https://tingy.byavi.in" }],
   creator: "Avinash Kumar",
@@ -82,9 +101,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://tingy.byavi.in",
-    title: "Tingy - Free Online Image Compressor | Reduce Image Size by 80%",
+    title:
+      "Tingy - Free Image Compressor | Best TinyPNG Alternative | Compress JPG, PNG, WEBP & AVIF",
     description:
-      "Compress JPG, PNG, WEBP & AVIF images up to 20MB for free. Smart presets for web, social media & email. No signup, no ads, completely free forever.",
+      "Free online image compressor - Compress JPG, PNG, WEBP & AVIF images up to 20MB without losing quality. Best alternative to TinyPNG and Compressor.io with batch compression, smart presets, and complete privacy. No signup, no limits, free forever.",
     siteName: "Tingy",
     images: [
       {
@@ -98,9 +118,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tingy - Free Online Image Compressor",
+    title: "Tingy - Free Image Compressor | Best TinyPNG Alternative",
     description:
-      "Compress images up to 20MB without losing quality. Fast, secure, and completely free. Supports JPG, PNG, WEBP, and AVIF formats.",
+      "Compress JPG, PNG, WEBP, and AVIF images up to 20MB without losing quality. Best free alternative to TinyPNG - Fast, secure, privacy-focused, and completely free forever. No signup required.",
     images: ["/og-image.png"],
     creator: "@avinashh10x",
     site: "@avinashh10x",
@@ -161,7 +181,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider defaultTheme="light" storageKey="tingy-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="tingy-theme">
           {children}
 
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -173,13 +193,8 @@ export default function RootLayout({
           </div>
 
           <Footer />
-          <ThemeSwitcher />
-          <Toaster
-            position="bottom-right"
-            richColors
-            closeButton
-            duration={4000}
-          />
+          <ThemeSwitcher className="hidden lg:block" />
+          <ThemedToaster />
         </ThemeProvider>
         <Analytics />
       </body>

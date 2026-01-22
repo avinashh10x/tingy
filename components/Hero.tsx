@@ -75,7 +75,7 @@ export const Hero = () => {
 
         <span
           ref={gradientTextRef}
-          className="block overflow-hidden lg:-mt-[2.8vw] "
+          className="block overflow-hidden -mt-[2.9vw]  "
         >
           <span className="block bg-gradient-accent bg-clip-text p-2">
             Without Losing Quality

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { MoveHorizontal, AlertCircle } from 'lucide-react';
-import { formatBytes } from '@/lib/image-utils';
+import { useState, useRef, useEffect } from "react";
+import { MoveHorizontal, AlertCircle } from "lucide-react";
+import { formatBytes } from "@/lib/image-utils";
 
 interface ImageComparisonSliderProps {
   originalUrl: string;
@@ -21,12 +21,15 @@ export function ImageComparisonSlider({
 }: ImageComparisonSliderProps) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
-  const [imageError, setImageError] = useState({ original: false, compressed: false });
+  const [imageError, setImageError] = useState({
+    original: false,
+    compressed: false,
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const updateSliderPosition = (clientX: number) => {
     if (!containerRef.current) return;
-    
+
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
@@ -67,13 +70,13 @@ export function ImageComparisonSlider({
     };
 
     if (isDragging) {
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener("mouseup", handleGlobalMouseUp);
+      document.addEventListener("mousemove", handleGlobalMouseMove);
     }
 
     return () => {
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
     };
   }, [isDragging]);
 
@@ -87,8 +90,12 @@ export function ImageComparisonSlider({
         <div className="aspect-video rounded-lg border border-destructive/50 bg-destructive/10 flex items-center justify-center">
           <div className="text-center p-6">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-3" />
-            <p className="text-sm font-medium text-destructive">Failed to load images</p>
-            <p className="text-xs text-muted-foreground mt-1">Please try compressing again</p>
+            <p className="text-sm font-medium text-destructive">
+              Failed to load images
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Please try compressing again
+            </p>
           </div>
         </div>
       </div>
@@ -104,10 +111,10 @@ export function ImageComparisonSlider({
           <span>Drag to compare</span>
         </div>
       </div>
-      
+
       <div
         ref={containerRef}
-        className="relative aspect-video cursor-ew-resize select-none overflow-hidden rounded-lg border bg-muted/30"
+        className="relative aspect-video w-full cursor-ew-resize select-none overflow-hidden rounded-lg border bg-muted/30"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onTouchStart={handleTouchStart}
@@ -121,7 +128,9 @@ export function ImageComparisonSlider({
             alt="Compressed"
             className="h-full w-full object-contain"
             draggable={false}
-            onError={() => setImageError(prev => ({ ...prev, compressed: true }))}
+            onError={() =>
+              setImageError((prev) => ({ ...prev, compressed: true }))
+            }
           />
           <div className="absolute bottom-2 right-2 rounded bg-primary/90 px-2 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
             Compressed
@@ -142,8 +151,8 @@ export function ImageComparisonSlider({
             className="h-full w-full object-contain"
             draggable={false}
             onError={(e) => {
-              console.error('Original image failed to load:', originalUrl, e);
-              setImageError(prev => ({ ...prev, original: true }));
+              console.error("Original image failed to load:", originalUrl, e);
+              setImageError((prev) => ({ ...prev, original: true }));
             }}
           />
           <div className="absolute bottom-2 left-2 rounded bg-background/90 px-2 py-1 text-xs font-medium backdrop-blur">
@@ -178,11 +187,11 @@ export function ImageComparisonSlider({
       {/* Image Details */}
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="rounded bg-muted/50 p-2">
-          <span className="font-medium">Original:</span>{' '}
+          <span className="font-medium">Original:</span>{" "}
           {formatBytes(originalSize)}
         </div>
         <div className="rounded bg-primary/10 p-2">
-          <span className="font-medium">Compressed:</span>{' '}
+          <span className="font-medium">Compressed:</span>{" "}
           {formatBytes(compressedSize)} • {format.toUpperCase()}
         </div>
       </div>
