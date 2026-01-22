@@ -40,7 +40,7 @@ export const Hero = () => {
             y: "100%",
             duration: 0.9,
           },
-          "-=0.9"
+          "-=0.9",
         )
         .from(
           subtitleRef.current,
@@ -49,7 +49,7 @@ export const Hero = () => {
             y: 20,
             duration: 0.8,
           },
-          "-=0.9"
+          "-=0.9",
         );
     }, sectionRef);
 
@@ -87,8 +87,9 @@ export const Hero = () => {
         ref={subtitleRef}
         className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 px-4"
       >
-        Free online tool to compress JPG, PNG, WEBP, and AVIF images up to 20MB.
-        Smart presets and powerful controls for perfect results every time.
+        Free online image compressor for JPG, PNG, WebP, and AVIF. <br /> Compress up
+        to 15 images at once (20MB max) with smart presets and advanced
+        optimization controls.
       </p>
     </div>
   );
